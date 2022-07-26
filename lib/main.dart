@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'dart:math' as math;
 
 import 'package:map_pro/models/volunteer_centers.dart';
@@ -35,7 +36,60 @@ class _HomeState extends State<Home> {
   Set<Marker> markers = Set(); //markers for google map
 
   String mapStyle ='';
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  LocationData? _userLocation;
+  Future<void> _getUserLocation() async {
+    Location location = Location();
 
+
+    // Check if location service is enable
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    // Check if permission is granted
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    final _locationData = await location.getLocation();
+    setState(() {
+      _userLocation = _locationData;
+    });
+  }
+
+
+  // Location currentLocation = Location();
+  //
+  // void getLocation() async{
+  //   var location = await currentLocation.getLocation();
+  //   currentLocation.onLocationChanged.listen((LocationData loc){
+  //
+  //     mapController?.animateCamera(CameraUpdate.newCameraPosition(
+  //         new CameraPosition(
+  //       target: LatLng(loc.latitude ?? 0.0,loc.longitude?? 0.0),
+  //       zoom: 10.0,
+  //     )));
+  //     print("My latitude: $loc.latitude");
+  //     print("My longitude: $loc.longitude");
+  //     setState(() {
+  //       markers.add(Marker(markerId: MarkerId('Home'),
+  //           icon: BitmapDescriptor.defaultMarker,
+  //           position: LatLng(loc.latitude ?? 0.0, loc.longitude ?? 0.0)
+  //
+  //       ));
+  //     });
+  //   });
+  // }
 
   ListView _buildBottonNavigationMethod(name, address, imageURL, workHours) {
     return ListView(
@@ -82,8 +136,12 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
+
     addMarkers();
     super.initState();
+    setState(() {
+      // getLocation();
+    });
     DefaultAssetBundle.of(context).loadString('map_style.dart').then((string) {
       this.mapStyle = string;
     }).catchError((error) {
@@ -249,29 +307,45 @@ class _HomeState extends State<Home> {
           title: Text("Image Marker on Google Map"),
           backgroundColor: Colors.deepPurpleAccent,
         ),
-        body: GoogleMap(
-          //Map widget from google_maps_flutter package
-          zoomGesturesEnabled: true,
-          //enable Zoom in, out on map
-          initialCameraPosition: CameraPosition(
-            //innital position in map
-            target: _center, //initial position
-            zoom: 14.0, //initial zoom level
-          ),
-          markers: markers,
-          //markers to show on map
-          mapType: MapType.normal,
-          //map type
-          onMapCreated: (controller) {
-            controller.setMapStyle(MapStyle.mapStyles);
-            //method called when map is created
-            setState(() {
-              mapController = controller;
-            });
+        body: Container(
 
-          },
-        ));
+          child: GoogleMap(
+            //Map widget from google_maps_flutter package
+            zoomGesturesEnabled: true,
+            //enable Zoom in, out on map
+            initialCameraPosition: CameraPosition(
+              //innital position in map
+              // target: ,
+              target: _center, //initial position
+              zoom: 14.0, //initial zoom level
+            ),
+            markers: markers,
+            //markers to show on map
+            mapType: MapType.normal,
+            //map type
+            onMapCreated: (controller) {
+              controller.setMapStyle(MapStyle.mapStyles);
+              //method called when map is created
+              setState(() {
+                mapController = controller;
+              });
+
+            },
+
+          ),
+        ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.location_searching,color: Colors.white,),
+        onPressed: (){
+          setState(() {
+            _getUserLocation;
+            print("Your latitude: ${_userLocation?.latitude}");
+          });
+        },
+      ),);
   }
+
+
 }
 
 // import 'package:flutter/material.dart';
