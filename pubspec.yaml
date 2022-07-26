@@ -39,6 +39,7 @@ dependencies:
   syncfusion_flutter_maps: ^20.2.40
   geolocator: ^9.0.1
   geocoding: ^2.0.4
+  permission_handler: ^10.0.0
 
 dev_dependencies:
   flutter_test:

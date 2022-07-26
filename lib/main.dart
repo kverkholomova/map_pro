@@ -3,8 +3,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+// import 'package:location/location.dart';
 import 'dart:math' as math;
 
 import 'package:map_pro/models/volunteer_centers.dart';
@@ -36,36 +38,113 @@ class _HomeState extends State<Home> {
   Set<Marker> markers = Set(); //markers for google map
 
   String mapStyle ='';
-  late bool _serviceEnabled;
-  late PermissionStatus _permissionGranted;
-  LocationData? _userLocation;
-  Future<void> _getUserLocation() async {
-    Location location = Location();
 
+  
 
-    // Check if location service is enable
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
+  late Position _currentPosition;
 
-    // Check if permission is granted
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    final _locationData = await location.getLocation();
-    setState(() {
-      _userLocation = _locationData;
+  _getCurrentLocation() {
+    Geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+      });
+    }).catchError((e) {
+      print(e);
     });
   }
+
+  // String? _currentAddress;
+  // Position? _currentPosition;
+  //
+  // Future<bool> _handleLocationPermission() async {
+  //   bool serviceEnabled;
+  //   LocationPermission permission;
+  //
+  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  //   if (!serviceEnabled) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //         content: Text(
+  //             'Location services are disabled. Please enable the services')));
+  //     return false;
+  //   }
+  //   permission = await Geolocator.checkPermission();
+  //   if (permission == LocationPermission.denied) {
+  //     permission = await Geolocator.requestPermission();
+  //     if (permission == LocationPermission.denied) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(content: Text('Location permissions are denied')));
+  //       return false;
+  //     }
+  //   }
+  //   if (permission == LocationPermission.deniedForever) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //         content: Text(
+  //             'Location permissions are permanently denied, we cannot request permissions.')));
+  //     return false;
+  //   }
+  //   return true;
+  // }
+  //
+  // Future<void> _getCurrentPosition() async {
+  //   final hasPermission = await _handleLocationPermission();
+  //
+  //   if (!hasPermission) return;
+  //   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+  //       .then((Position position) {
+  //     setState(() => _currentPosition = position);
+  //     _getAddressFromLatLng(_currentPosition!);
+  //   }).catchError((e) {
+  //     debugPrint(e);
+  //   });
+  // }
+  //
+  // Future<void> _getAddressFromLatLng(Position position) async {
+  //   await placemarkFromCoordinates(
+  //       _currentPosition!.latitude, _currentPosition!.longitude)
+  //       .then((List<Placemark> placemarks) {
+  //     Placemark place = placemarks[0];
+  //     setState(() {
+  //       _currentAddress =
+  //       '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+  //     });
+  //   }).catchError((e) {
+  //     debugPrint(e);
+  //   });
+  // }
+
+
+  // late bool _serviceEnabled;
+  // late PermissionStatus _permissionGranted;
+  // LocationData? _userLocation;
+  // Future<void> _getUserLocation() async {
+  //   Location location = Location();
+  //
+  //
+  //   // Check if location service is enable
+  //   _serviceEnabled = await location.serviceEnabled();
+  //   if (!_serviceEnabled) {
+  //     _serviceEnabled = await location.requestService();
+  //     if (!_serviceEnabled) {
+  //       return;
+  //     }
+  //   }
+  //
+  //   // Check if permission is granted
+  //   _permissionGranted = await location.hasPermission();
+  //   if (_permissionGranted == PermissionStatus.denied) {
+  //     _permissionGranted = await location.requestPermission();
+  //     if (_permissionGranted != PermissionStatus.granted) {
+  //       return;
+  //     }
+  //   }
+  //
+  //   final _locationData = await location.getLocation();
+  //   setState(() {
+  //     _userLocation = _locationData;
+  //   });
+  // }
 
 
   // Location currentLocation = Location();
@@ -137,6 +216,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
 
+    _getCurrentLocation();
     addMarkers();
     super.initState();
     setState(() {
@@ -338,8 +418,10 @@ class _HomeState extends State<Home> {
         child: Icon(Icons.location_searching,color: Colors.white,),
         onPressed: (){
           setState(() {
-            _getUserLocation;
-            print("Your latitude: ${_userLocation?.latitude}");
+            _getCurrentLocation();
+            // if (_currentPosition != null) print(
+            //     "LAT: ${_currentPosition.latitude}, LNG: ${_currentPosition.longitude}"
+            // );
           });
         },
       ),);
