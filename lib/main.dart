@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math' as math;
 
 import 'package:map_pro/models/volunteer_centers.dart';
+
+import 'map_style.dart';
 
 final LatLng _center = const LatLng(54.4641, 17.0287);
 
@@ -30,6 +33,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   GoogleMapController? mapController; //contrller for Google map
   Set<Marker> markers = Set(); //markers for google map
+
+  String mapStyle ='';
+
 
   ListView _buildBottonNavigationMethod(name, address, imageURL, workHours) {
     return ListView(
@@ -78,6 +84,32 @@ class _HomeState extends State<Home> {
   void initState() {
     addMarkers();
     super.initState();
+    DefaultAssetBundle.of(context).loadString('map_style.dart').then((string) {
+      this.mapStyle = string;
+    }).catchError((error) {
+      log(error.toString());
+    });
+  }
+
+  void mapCreated(GoogleMapController controller) {
+    //set style on the map on creation to customize look showing only map features
+    //we want to show.
+    log(this.mapStyle);
+    setState(() {
+      this.mapController = controller;
+      if (mapStyle != null) {
+        this.mapController?.setMapStyle(this.mapStyle).
+        then((value) {
+          log("Map Style set");
+
+        }).catchError((error) =>
+            log("Error setting map style:" + error.toString()));
+      }
+      else {
+        log(
+            "GoogleMapView:_onMapCreated: Map style could not be loaded.");
+      }
+    });
   }
 
   addMarkers() async {
@@ -231,6 +263,7 @@ class _HomeState extends State<Home> {
           mapType: MapType.normal,
           //map type
           onMapCreated: (controller) {
+            controller.setMapStyle(MapStyle.mapStyles);
             //method called when map is created
             setState(() {
               mapController = controller;
