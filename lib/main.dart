@@ -308,6 +308,7 @@ class _HomeState extends State<Home> {
               ),
               onPressed: () async {
                 await getDirections(point);
+                Navigator.pop(context);
                 // _getPolyline();
                 // PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(googleApiKey,
                 //     PointLatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0), PointLatLng(54.468683, 17.028140));
