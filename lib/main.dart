@@ -2,14 +2,11 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:geocoding/geocoding.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:location/location.dart';
 import 'dart:math' as math;
 
-import 'package:map_pro/models/volunteer_centers.dart';
 
 import 'map_style.dart';
 
@@ -38,17 +35,79 @@ class _HomeState extends State<Home> {
   Set<Marker> markers = Set(); //markers for google map
 
   String mapStyle ='';
+  Position? _currentPosition ;
 
-  
+  /// Determine the current position of the device.
+  ///
+  /// When the location services are not enabled or permissions
+  /// are denied the `Future` will return an error.
+  Future<Future<Position>?> _determinePosition() async {
 
-  late Position _currentPosition;
+    // _currentPosition = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    // return await Geolocator.getCurrentPosition();
+    return await _getCurrentLocation();
+    // Geolocator
+    //     .getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true)
+    //     .then((Position position) {
+    //   setState(() {
+    //     _currentPosition = position;
+    //   });
+    // }).catchError((e) {
+    //   print("There is an error!");
+    //   print(e);
+    // });
+  }
+
+  // late Position _currentPosition;
 
   _getCurrentLocation() {
-    Geolocator
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true)
+   Geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best,)
         .then((Position position) {
       setState(() {
+        print("PPPPPPPPPPPPPPP");
+        print(position);
         _currentPosition = position;
+
+        print(_currentPosition);
+        // if(_currentPosition==null){
+        //   print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        //   print(_currentPosition);
+        //   _getCurrentLocation();
+        // }
       });
     }).catchError((e) {
       print(e);
@@ -216,10 +275,14 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
 
-    _getCurrentLocation();
+    // print(_currentPosition?.latitude);
+    // _getCurrentLocation();
     addMarkers();
     super.initState();
     setState(() {
+      _determinePosition();
+      // _getCurrentLocation();
+      // _currentPosition = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
       // getLocation();
     });
     DefaultAssetBundle.of(context).loadString('map_style.dart').then((string) {
@@ -251,10 +314,10 @@ class _HomeState extends State<Home> {
   }
 
   addMarkers() async {
-    BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(),
-      "assets/images/bike.png",
-    );
+    // BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
+    //   ImageConfiguration(),
+    //   "assets/images/bike.png",
+    // );
 
     markers.add(Marker(
         //add start location marker
@@ -418,10 +481,38 @@ class _HomeState extends State<Home> {
         child: Icon(Icons.location_searching,color: Colors.white,),
         onPressed: (){
           setState(() {
+
             _getCurrentLocation();
-            // if (_currentPosition != null) print(
-            //     "LAT: ${_currentPosition.latitude}, LNG: ${_currentPosition.longitude}"
-            // );
+            // _determinePosition();
+            // var a = _currentPosition as Position;
+            print("LOOOOOOKKK HHEREEEEE");
+            // print(a);
+            // if(_currentPosition!=null) {
+            //   print("empty");
+            // }
+            // else{
+              print(_currentPosition?.latitude);
+              print(_currentPosition?.longitude);
+
+            // }
+
+
+
+            if (_currentPosition != null) {
+              print(
+                "LAT: ${_currentPosition?.latitude}, LNG: ${_currentPosition?.longitude}"
+            );
+              markers.add(Marker(markerId: MarkerId('Home'),
+                  icon: BitmapDescriptor.defaultMarker,
+                  position: LatLng(_currentPosition?.latitude ?? 0.0, _currentPosition?.longitude ?? 0.0)
+
+              ));
+              mapController?.animateCamera(CameraUpdate.newCameraPosition(
+                  new CameraPosition(
+                    target: LatLng(_currentPosition?.latitude ?? 0.0, _currentPosition?.longitude ?? 0.0),
+                    zoom: 15.0,
+                  )));
+            }
           });
         },
       ),);
