@@ -1,34 +1,36 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_routes/google_maps_routes.dart';
-import 'dart:math' as math;
+
 
 
 import 'map_style.dart';
 
-final LatLng _center = const LatLng(54.4641, 17.0287);
+const LatLng _center = LatLng(54.4641, 17.0287);
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Home(),
     );
   }
 }
 
 class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -39,24 +41,25 @@ class _HomeState extends State<Home> {
   Map<PolylineId, Polyline> polylines = {};
   LatLng? startLocation;
   LatLng? endLocation;
+
   // Completer<GoogleMapController> _controller = Completer();
   // MapsRoutes route = new MapsRoutes();
-  String googleApiKey ="AIzaSyBo0CRm0MxnMECsfABDI6L36ZXrohED0II";
+  String googleApiKey = "AIzaSyDgTt2bcZuY9E80r1aglafLEyVd7g8Qcfk";
+
   // Map<PolylineId, Polyline> polylines = {};
   // List<LatLng> polylineCoordinates = [];
   // PolylinePoints polylinePoints = PolylinePoints();
   GoogleMapController? mapController; //contrller for Google map
-  Set<Marker> markers = Set(); //markers for google map
+  Set<Marker> markers = {}; //markers for google map
 
-  String mapStyle ='';
-  Position? _currentPosition ;
+  String mapStyle = '';
+  Position? _currentPosition;
 
   /// Determine the current position of the device.
   ///
   /// When the location services are not enabled or permissions
   /// are denied the `Future` will return an error.
   Future<Future<Position>?> _determinePosition() async {
-
     // _currentPosition = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
     bool serviceEnabled;
     LocationPermission permission;
@@ -108,15 +111,14 @@ class _HomeState extends State<Home> {
   // late Position _currentPosition;
 
   _getCurrentLocation() {
-   Geolocator
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best,)
-        .then((Position position) {
+    Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.best,
+    ).then((Position position) {
       setState(() {
-        print("PPPPPPPPPPPPPPP");
-        print(position);
+
         _currentPosition = position;
 
-        print(_currentPosition);
+
         // if(_currentPosition==null){
         //   print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         //   print(_currentPosition);
@@ -213,7 +215,6 @@ class _HomeState extends State<Home> {
   //   });
   // }
 
-
   // late bool _serviceEnabled;
   // late PermissionStatus _permissionGranted;
   // LocationData? _userLocation;
@@ -245,7 +246,6 @@ class _HomeState extends State<Home> {
   //   });
   // }
 
-
   // Location currentLocation = Location();
   //
   // void getLocation() async{
@@ -272,7 +272,8 @@ class _HomeState extends State<Home> {
   // PolylinePoints polylinePoints = PolylinePoints();
 
   // List<LatLng> road=[];
-  ListView _buildBottonNavigationMethod(name, address, imageURL, workHours) {
+  ListView _buildBottonNavigationMethod(
+      name, address, imageURL, workHours, point) {
     return ListView(
       // mainAxisSize: MainAxisSize.min,
       // mainAxisSize: MainAxisSize.max,
@@ -286,13 +287,13 @@ class _HomeState extends State<Home> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ListTile(
-            leading: Icon(Icons.maps_home_work_outlined),
+            leading: const Icon(Icons.maps_home_work_outlined),
             title: Text(name),
             subtitle: Text(address),
           ),
         ),
         Padding(
-          padding:  EdgeInsets.only(left:80, bottom: 20.0),
+          padding: const EdgeInsets.only(left: 80, bottom: 20.0),
           child: Align(
               alignment: Alignment.topLeft,
               child: Text("Work hours: $workHours")),
@@ -305,9 +306,8 @@ class _HomeState extends State<Home> {
                 minimumSize: const Size.fromHeight(50),
                 // NEW
               ),
-              onPressed: ()async{
-
-                getDirections();
+              onPressed: () async {
+                await getDirections(point);
                 // _getPolyline();
                 // PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(googleApiKey,
                 //     PointLatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0), PointLatLng(54.468683, 17.028140));
@@ -317,28 +317,31 @@ class _HomeState extends State<Home> {
                 // await route.drawRoute(road, 'Test routes',
                 //     Color.fromRGBO(130, 78, 210, 1.0), googleApiKey,
                 //     travelMode: TravelModes.walking);
-          },
-              child: Text("Directions", style: TextStyle(fontSize: 14),)),
+              },
+              child: const Text(
+                "Directions",
+                style: TextStyle(fontSize: 14),
+              )),
         )
-
       ],
     );
   }
 
-  getDirections() async {
+  getDirections(PointLatLng pointLatLng) async {
     List<LatLng> polylineCoordinates = [];
 
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       googleApiKey,
-      PointLatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0),
-      PointLatLng(54.468683, 17.028140),
+      PointLatLng(_currentPosition != null ? _currentPosition!.latitude : 0,
+          _currentPosition != null ? _currentPosition!.longitude : 0),
+      pointLatLng,
       travelMode: TravelMode.driving,
     );
 
     if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
+      for (var point in result.points) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      });
+      }
     } else {
       print(result.errorMessage);
     }
@@ -346,7 +349,7 @@ class _HomeState extends State<Home> {
   }
 
   addPolyLine(List<LatLng> polylineCoordinates) {
-    PolylineId id = PolylineId("poly");
+    PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
       color: Colors.deepPurpleAccent,
@@ -365,9 +368,10 @@ class _HomeState extends State<Home> {
     addMarkers();
     super.initState();
     setState(() {
-
-      LatLng startLocation = LatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0);
-      LatLng endLocation = LatLng(54.468683, 17.028140);
+      // LatLng startLocation = LatLng(
+      //     _currentPosition != null ? _currentPosition!.latitude : 0,
+      //     _currentPosition != null ? _currentPosition!.longitude : 0);
+      // LatLng endLocation = LatLng(54.468683, 17.028140);
       _determinePosition();
       // _getPolyline();
       // _getCurrentLocation();
@@ -375,7 +379,7 @@ class _HomeState extends State<Home> {
       // getLocation();
     });
     DefaultAssetBundle.of(context).loadString('map_style.dart').then((string) {
-      this.mapStyle = string;
+      mapStyle = string;
     }).catchError((error) {
       log(error.toString());
     });
@@ -384,20 +388,16 @@ class _HomeState extends State<Home> {
   void mapCreated(GoogleMapController controller) {
     //set style on the map on creation to customize look showing only map features
     //we want to show.
-    log(this.mapStyle);
+    log(mapStyle);
     setState(() {
-      this.mapController = controller;
+      mapController = controller;
       if (mapStyle != null) {
-        this.mapController?.setMapStyle(this.mapStyle).
-        then((value) {
+        mapController?.setMapStyle(mapStyle).then((value) {
           log("Map Style set");
-
-        }).catchError((error) =>
-            log("Error setting map style:" + error.toString()));
-      }
-      else {
-        log(
-            "GoogleMapView:_onMapCreated: Map style could not be loaded.");
+        }).catchError(
+            (error) => log("Error setting map style:$error"));
+      } else {
+        log("GoogleMapView:_onMapCreated: Map style could not be loaded.");
       }
     });
   }
@@ -410,10 +410,10 @@ class _HomeState extends State<Home> {
 
     markers.add(Marker(
         //add start location marker
-        markerId: MarkerId(LatLng(54.468683, 17.028140).toString()),
-        position: LatLng(54.468683, 17.028140),
+        markerId: MarkerId(const LatLng(54.468683, 17.028140).toString()),
+        position: const LatLng(54.468683, 17.028140),
         //position of marker
-        infoWindow: InfoWindow(
+        infoWindow: const InfoWindow(
           //popup info
           title: "Regionalne Centrum Wolontariatu",
           snippet: "aleja Henryka Sienkiewicza 6, 76-200 Słupsk",
@@ -421,30 +421,32 @@ class _HomeState extends State<Home> {
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
           showModalBottomSheet(
-            isScrollControlled: true,
-            // elevation: 25,
+              isScrollControlled: true,
+              // elevation: 25,
               context: context,
               builder: (builder) {
-                return Wrap(
-                  children: <Widget>[
-                    Container(
+                return Wrap(children: <Widget>[
+                  SizedBox(
                     height: MediaQuery.of(context).size.height * 0.65,
                     child: _buildBottonNavigationMethod(
                         "Regionalne Centrum Wolontariatu",
-                        "aleja Henryka Sienkiewicza 6, 76-200 Słupsk", "images/1.jpg", "9:00 - 15:00"),
-                  ),]
-                );
+                        "aleja Henryka Sienkiewicza 6, 76-200 Słupsk",
+                        "images/1.jpg",
+                        "9:00 - 15:00",
+                        const PointLatLng(54.468683, 17.028140)),
+                  ),
+                ]);
               });
         } //Icon for Marker
         ));
 
     markers.add(Marker(
         //add start location marker
-        markerId: MarkerId(LatLng(54.452438, 17.041785).toString()),
-        position: LatLng(54.452438, 17.041785),
+        markerId: MarkerId(const LatLng(54.452438, 17.041785).toString()),
+        position: const LatLng(54.452438, 17.041785),
         //position of marker
         // rotation:-45,
-        infoWindow: InfoWindow(
+        infoWindow: const InfoWindow(
           //popup info
           title: "Pomeranian Academy in Slupsk",
           snippet: "Krzysztofa Arciszewskiego, 76-200 Słupsk",
@@ -452,17 +454,20 @@ class _HomeState extends State<Home> {
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
           showModalBottomSheet(
-            isScrollControlled: true,
+              isScrollControlled: true,
               context: context,
               builder: (builder) {
-                return Wrap(
-                    children: <Widget>[
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.60,
-                  child: _buildBottonNavigationMethod(
-                      "Pomeranian Academy in Slupsk",
-                      "Krzysztofa Arciszewskiego, 76-200 Słupsk", "images/2.jpg", "9:00 - 15:00"),
-                )]);
+                return Wrap(children: <Widget>[
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.60,
+                    child: _buildBottonNavigationMethod(
+                        "Pomeranian Academy in Slupsk",
+                        "Krzysztofa Arciszewskiego, 76-200 Słupsk",
+                        "images/2.jpg",
+                        "9:00 - 15:00",
+                        const PointLatLng(54.452438, 17.041785)),
+                  )
+                ]);
               });
         }));
 
@@ -474,10 +479,10 @@ class _HomeState extends State<Home> {
 
     markers.add(Marker(
         //add start location marker
-        markerId: MarkerId(LatLng(54.451206, 17.023427).toString()),
-        position: LatLng(54.451206, 17.023427),
+        markerId: MarkerId(const LatLng(54.451206, 17.023427).toString()),
+        position: const LatLng(54.451206, 17.023427),
         //position of marker
-        infoWindow: InfoWindow(
+        infoWindow: const InfoWindow(
           //popup info
           title: "Municipal Family Assistance Center",
           snippet: "Słoneczna 15D, 76-200 Słupsk",
@@ -485,26 +490,29 @@ class _HomeState extends State<Home> {
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
           showModalBottomSheet(
-            isScrollControlled: true,
+              isScrollControlled: true,
               context: context,
               builder: (builder) {
-                return Wrap(
-                    children: <Widget>[
-                  Container(
+                return Wrap(children: <Widget>[
+                  SizedBox(
                     height: MediaQuery.of(context).size.height * 0.70,
-                  child: _buildBottonNavigationMethod(
-                      "Municipal Family Assistance Center",
-                      "Słoneczna 15D, 76-200 Słupsk", "images/3.jpg", "9:00 - 15:00"),
-                )]);
+                    child: _buildBottonNavigationMethod(
+                        "Municipal Family Assistance Center",
+                        "Słoneczna 15D, 76-200 Słupsk",
+                        "images/3.jpg",
+                        "9:00 - 15:00",
+                        const PointLatLng(54.451206, 17.023427)),
+                  )
+                ]);
               });
         } //Icon for Marker
         ));
     markers.add(Marker(
         //add start location marker
-        markerId: MarkerId(LatLng(54.458005, 17.028482).toString()),
-        position: LatLng(54.458005, 17.028482),
+        markerId: MarkerId(const LatLng(54.458005, 17.028482).toString()),
+        position: const LatLng(54.458005, 17.028482),
         //position of marker
-        infoWindow: InfoWindow(
+        infoWindow: const InfoWindow(
           //popup info
           title: "Zespół Szkół Technicznych",
           snippet: "Karola Szymanowskiego 5, 76-200 Słupsk",
@@ -512,17 +520,20 @@ class _HomeState extends State<Home> {
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
           showModalBottomSheet(
-            isScrollControlled: true,
+              isScrollControlled: true,
               context: context,
               builder: (builder) {
-                return Wrap(
-                    children: <Widget>[
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.57,
-                  child: _buildBottonNavigationMethod(
-                      "Zespół Szkół Technicznych",
-                      "Karola Szymanowskiego 5, 76-200 Słupsk", "images/4.jpg", "9:00 - 15:00"),
-                )]);
+                return Wrap(children: <Widget>[
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.57,
+                    child: _buildBottonNavigationMethod(
+                        "Zespół Szkół Technicznych",
+                        "Karola Szymanowskiego 5, 76-200 Słupsk",
+                        "images/4.jpg",
+                        "9:00 - 15:00",
+                        const PointLatLng(54.458005, 17.028482)),
+                  )
+                ]);
               });
         } //Icon for Marker
         ));
@@ -535,82 +546,71 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Image Marker on Google Map"),
-          backgroundColor: Colors.deepPurpleAccent,
+      appBar: AppBar(
+        title: const Text("Image Marker on Google Map"),
+        backgroundColor: Colors.deepPurpleAccent,
+      ),
+      body: GoogleMap(
+        polylines: Set<Polyline>.of(polylines.values),
+        //Map widget from google_maps_flutter package
+        zoomGesturesEnabled: true,
+        //enable Zoom in, out on map
+        initialCameraPosition: const CameraPosition(
+          //innital position in map
+          // target: ,
+          target: _center, //initial position
+          zoom: 14.0, //initial zoom level
         ),
-        body: Container(
-
-          child: GoogleMap(
-            polylines: Set<Polyline>.of(polylines.values),
-            //Map widget from google_maps_flutter package
-            zoomGesturesEnabled: true,
-            //enable Zoom in, out on map
-            initialCameraPosition: CameraPosition(
-              //innital position in map
-              // target: ,
-              target: _center, //initial position
-              zoom: 14.0, //initial zoom level
-            ),
-            markers: markers,
-            //markers to show on map
-            mapType: MapType.normal,
-            //map type
-            onMapCreated: (controller) {
-              controller.setMapStyle(MapStyle.mapStyles);
-              //method called when map is created
-              setState(() {
-                mapController = controller;
-              });
-
-            },
-
-          ),
-        ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.location_searching,color: Colors.white,),
-        onPressed: (){
+        markers: markers,
+        //markers to show on map
+        mapType: MapType.normal,
+        //map type
+        onMapCreated: (controller) {
+          controller.setMapStyle(MapStyle.mapStyles);
+          //method called when map is created
           setState(() {
-
+            mapController = controller;
+          });
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(
+          Icons.location_searching,
+          color: Colors.white,
+        ),
+        onPressed: () {
+          setState(() {
             _getCurrentLocation();
             // _determinePosition();
             // var a = _currentPosition as Position;
-            print("LOOOOOOKKK HHEREEEEE");
+
             // print(a);
             // if(_currentPosition!=null) {
             //   print("empty");
             // }
             // else{
-              print(_currentPosition?.latitude);
-              print(_currentPosition?.longitude);
 
             // }
 
-
-
             if (_currentPosition != null) {
-              print(
-                "LAT: ${_currentPosition?.latitude}, LNG: ${_currentPosition?.longitude}"
-            );
-              markers.add(Marker(markerId: MarkerId('Home'),
+
+              markers.add(Marker(
+                  markerId: const MarkerId('Home'),
                   icon: BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueGreen,
                   ),
-                  position: LatLng(_currentPosition?.latitude ?? 0.0, _currentPosition?.longitude ?? 0.0)
-
-              ));
-              mapController?.animateCamera(CameraUpdate.newCameraPosition(
-                  new CameraPosition(
-                    target: LatLng(_currentPosition?.latitude ?? 0.0, _currentPosition?.longitude ?? 0.0),
-                    zoom: 15.0,
-                  )));
-
+                  position: LatLng(_currentPosition?.latitude ?? 0.0,
+                      _currentPosition?.longitude ?? 0.0)));
+              mapController?.animateCamera(
+                  CameraUpdate.newCameraPosition(CameraPosition(
+                target: LatLng(_currentPosition?.latitude ?? 0.0,
+                    _currentPosition?.longitude ?? 0.0),
+                zoom: 15.0,
+              )));
             }
           });
         },
-      ),);
+      ),
+    );
   }
-
-
 }
-
