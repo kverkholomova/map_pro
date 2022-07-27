@@ -40,6 +40,8 @@ dependencies:
   geolocator: ^9.0.1
   geocoding: ^2.0.4
   permission_handler: ^10.0.0
+  google_maps_routes: ^1.1.2
+  flutter_polyline_points: ^1.0.0
 
 dev_dependencies:
   flutter_test:

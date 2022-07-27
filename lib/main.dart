@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_routes/google_maps_routes.dart';
 import 'dart:math' as math;
 
 
@@ -31,6 +34,17 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  // GoogleMapController? mapController; //contrller for Google map
+  PolylinePoints polylinePoints = PolylinePoints();
+  Map<PolylineId, Polyline> polylines = {};
+  LatLng? startLocation;
+  LatLng? endLocation;
+  // Completer<GoogleMapController> _controller = Completer();
+  // MapsRoutes route = new MapsRoutes();
+  String googleApiKey ="AIzaSyBSrf_u7yWO3iAUHZnNRsizlmp_wG2fqvc";
+  // Map<PolylineId, Polyline> polylines = {};
+  // List<LatLng> polylineCoordinates = [];
+  // PolylinePoints polylinePoints = PolylinePoints();
   GoogleMapController? mapController; //contrller for Google map
   Set<Marker> markers = Set(); //markers for google map
 
@@ -114,6 +128,32 @@ class _HomeState extends State<Home> {
     });
   }
 
+  // _addPolyLine() {
+  //   PolylineId id = PolylineId("poly");
+  //   Polyline polyline = Polyline(
+  //       polylineId: id, color: Colors.red, points: polylineCoordinates);
+  //   polylines[id] = polyline;
+  //   setState(() {});
+  // }
+  //
+  // _getPolyline() async {
+  //   print("WWWWWOOOOOOOOOOORRRRRRRRRKKKKKKKKK");
+  //   PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+  //       googleApiKey,
+  //       PointLatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0),
+  //       PointLatLng(54.468683, 17.028140),
+  //       travelMode: TravelMode.walking,
+  //       wayPoints: [PolylineWayPoint(location: "Sabo, Yaba Lagos Nigeria")]);
+  //   if (result.points.isNotEmpty) {
+  //     result.points.forEach((PointLatLng point) {
+  //       polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+  //     });
+  //   }
+  //   print("AAAAAAAAAAADDDDDDDDDDDDDDDDDDDDDDDD");
+  //   setState(() {
+  //     _addPolyLine();
+  //   });
+  // }
   // String? _currentAddress;
   // Position? _currentPosition;
   //
@@ -229,6 +269,9 @@ class _HomeState extends State<Home> {
   //   });
   // }
 
+  // PolylinePoints polylinePoints = PolylinePoints();
+
+  // List<LatLng> road=[];
   ListView _buildBottonNavigationMethod(name, address, imageURL, workHours) {
     return ListView(
       // mainAxisSize: MainAxisSize.min,
@@ -262,8 +305,18 @@ class _HomeState extends State<Home> {
                 minimumSize: const Size.fromHeight(50),
                 // NEW
               ),
-              onPressed: (){
+              onPressed: ()async{
 
+                getDirections();
+                // _getPolyline();
+                // PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(googleApiKey,
+                //     PointLatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0), PointLatLng(54.468683, 17.028140));
+                // print(result.points);
+                // road.add(LatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0));
+                // road.add(LatLng(54.468683, 17.028140));
+                // await route.drawRoute(road, 'Test routes',
+                //     Color.fromRGBO(130, 78, 210, 1.0), googleApiKey,
+                //     travelMode: TravelModes.walking);
           },
               child: Text("Directions", style: TextStyle(fontSize: 14),)),
         )
@@ -272,15 +325,51 @@ class _HomeState extends State<Home> {
     );
   }
 
+  getDirections() async {
+    List<LatLng> polylineCoordinates = [];
+
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      googleApiKey,
+      PointLatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0),
+      PointLatLng(54.468683, 17.028140),
+      travelMode: TravelMode.driving,
+    );
+
+    if (result.points.isNotEmpty) {
+      result.points.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+    } else {
+      print(result.errorMessage);
+    }
+    addPolyLine(polylineCoordinates);
+  }
+
+  addPolyLine(List<LatLng> polylineCoordinates) {
+    PolylineId id = PolylineId("poly");
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: Colors.deepPurpleAccent,
+      points: polylineCoordinates,
+      width: 8,
+    );
+    polylines[id] = polyline;
+    setState(() {});
+  }
+
   @override
   void initState() {
-
     // print(_currentPosition?.latitude);
     // _getCurrentLocation();
+
     addMarkers();
     super.initState();
     setState(() {
+
+      LatLng startLocation = LatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0);
+      LatLng endLocation = LatLng(54.468683, 17.028140);
       _determinePosition();
+      // _getPolyline();
       // _getCurrentLocation();
       // _currentPosition = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
       // getLocation();
@@ -453,6 +542,7 @@ class _HomeState extends State<Home> {
         body: Container(
 
           child: GoogleMap(
+            polylines: Set<Polyline>.of(polylines.values),
             //Map widget from google_maps_flutter package
             zoomGesturesEnabled: true,
             //enable Zoom in, out on map
@@ -503,7 +593,9 @@ class _HomeState extends State<Home> {
                 "LAT: ${_currentPosition?.latitude}, LNG: ${_currentPosition?.longitude}"
             );
               markers.add(Marker(markerId: MarkerId('Home'),
-                  icon: BitmapDescriptor.defaultMarker,
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueGreen,
+                  ),
                   position: LatLng(_currentPosition?.latitude ?? 0.0, _currentPosition?.longitude ?? 0.0)
 
               ));
@@ -512,6 +604,7 @@ class _HomeState extends State<Home> {
                     target: LatLng(_currentPosition?.latitude ?? 0.0, _currentPosition?.longitude ?? 0.0),
                     zoom: 15.0,
                   )));
+
             }
           });
         },
@@ -521,47 +614,3 @@ class _HomeState extends State<Home> {
 
 }
 
-// import 'package:flutter/material.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:map_pro/models/volunteer_centers.dart';
-//
-//
-//
-// void main() => runApp(const MyApp());
-//
-// class MyApp extends StatefulWidget {
-//   const MyApp({super.key});
-//
-//   @override
-//   State<MyApp> createState() => _MyAppState();
-// }
-//
-// class _MyAppState extends State<MyApp> {
-//   late GoogleMapController mapController;
-//
-//   final LatLng _center = const LatLng(54.4641, 17.0287);
-//
-//   void _onMapCreated(GoogleMapController controller) {
-//     mapController = controller;
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Scaffold(
-//         appBar: AppBar(
-//           title: const Text('Maps Sample App'),
-//           backgroundColor: Colors.green[700],
-//         ),
-//         body: GoogleMap(
-//           onMapCreated: _onMapCreated,
-//           initialCameraPosition: CameraPosition(
-//             target: _center,
-//             zoom: 11.0,
-//           ),
-//           // markers: LocationList.toSet(),
-//         ),
-//       ),
-//     );
-//   }
-// }
