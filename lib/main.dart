@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math' show cos, sqrt, asin;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -12,7 +13,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'map_style.dart';
 
 const LatLng _center = LatLng(54.4641, 17.0287);
-
+bool isVisible = false;
 void main() {
   runApp(const MyApp());
 }
@@ -128,6 +129,7 @@ class _HomeState extends State<Home> {
     }).catchError((e) {
       print(e);
     });
+
   }
 
   // _addPolyLine() {
@@ -272,6 +274,21 @@ class _HomeState extends State<Home> {
   // PolylinePoints polylinePoints = PolylinePoints();
 
   // List<LatLng> road=[];
+
+  // PolylinePoints polylinePoints = PolylinePoints();
+  double distance = 0.0;
+  List<LatLng> polylineCoordinates = [];
+
+  double _coordinateDistance(lat1, lon1, lat2, lon2) {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return 12742 * asin(sqrt(a));
+  }
+
+
   ListView _buildBottonNavigationMethod(
       name, address, imageURL, workHours, point) {
     return ListView(
@@ -307,6 +324,7 @@ class _HomeState extends State<Home> {
                 // NEW
               ),
               onPressed: () async {
+                isVisible = true;
                 await getDirections(point);
                 Navigator.pop(context);
                 // _getPolyline();
@@ -328,6 +346,19 @@ class _HomeState extends State<Home> {
     );
   }
 
+  double totalDistance = 0.0;
+
+// Calculating the total distance by adding the distance
+// between small segments
+
+  double calculateDistance(lat1, lon1, lat2, lon2){
+    var p = 0.017453292519943295;
+    var a = 0.5 - cos((lat2 - lat1) * p)/2 +
+        cos(lat1 * p) * cos(lat2 * p) *
+            (1 - cos((lon2 - lon1) * p))/2;
+    return 12742 * asin(sqrt(a));
+  }
+
   getDirections(PointLatLng pointLatLng) async {
     List<LatLng> polylineCoordinates = [];
 
@@ -336,7 +367,7 @@ class _HomeState extends State<Home> {
       PointLatLng(_currentPosition != null ? _currentPosition!.latitude : 0,
           _currentPosition != null ? _currentPosition!.longitude : 0),
       pointLatLng,
-      travelMode: TravelMode.driving,
+      travelMode: TravelMode.walking,
     );
 
     if (result.points.isNotEmpty) {
@@ -347,6 +378,51 @@ class _HomeState extends State<Home> {
       print(result.errorMessage);
     }
     addPolyLine(polylineCoordinates);
+    print("LOOOOOOK HEEEEERRREEEEEE");
+    print((Geolocator.distanceBetween(_currentPosition != null ? _currentPosition!.latitude : 0,
+        _currentPosition != null ? _currentPosition!.longitude : 0, pointLatLng.latitude, pointLatLng.longitude)/1000).toStringAsFixed(2));
+
+//     double totalDistance = 0;
+//     for (int i = 0; i < polylineCoordinates.length - 1; i++) {
+//       totalDistance += _coordinateDistance(
+//           _currentPosition != null ? _currentPosition!.latitude : 0,
+//           _currentPosition != null ? _currentPosition!.longitude : 0,
+//           pointLatLng.latitude,
+//           pointLatLng.longitude
+//       );
+//     }
+//
+// // Storing the calculated total distance of the route
+//     setState(() {
+//       var _placeDistance = totalDistance.toStringAsFixed(2);
+//       print('DISTANCE: $_placeDistance km');
+//     });
+    // Calculating the distance between the start and end positions
+// with a straight path, without considering any route
+
+    // double distanceInMeters = await Geolocator.bearingBetween(
+    //     _currentPosition != null ? _currentPosition!.latitude : 0,
+    //     _currentPosition != null ? _currentPosition!.longitude : 0,
+    //     pointLatLng.latitude,
+    //     pointLatLng.longitude
+    // );
+    // print(distanceInMeters);
+
+    double totalDistance = 0;
+    for(var i = 0; i < polylineCoordinates.length-1; i++){
+      totalDistance += calculateDistance(
+          polylineCoordinates[i].latitude,
+          polylineCoordinates[i].longitude,
+          polylineCoordinates[i+1].latitude,
+          polylineCoordinates[i+1].longitude);
+    }
+    print("Final distance:");
+    print(totalDistance);
+
+    setState(() {
+      distance = totalDistance;
+    });
+
   }
 
   addPolyLine(List<LatLng> polylineCoordinates) {
@@ -358,8 +434,12 @@ class _HomeState extends State<Home> {
       width: 8,
     );
     polylines[id] = polyline;
-    setState(() {});
+    setState(() {
+
+    });
   }
+
+
 
   @override
   void initState() {
@@ -551,66 +631,90 @@ class _HomeState extends State<Home> {
         title: const Text("Image Marker on Google Map"),
         backgroundColor: Colors.deepPurpleAccent,
       ),
-      body: GoogleMap(
-        polylines: Set<Polyline>.of(polylines.values),
-        //Map widget from google_maps_flutter package
-        zoomGesturesEnabled: true,
-        //enable Zoom in, out on map
-        initialCameraPosition: const CameraPosition(
-          //innital position in map
-          // target: ,
-          target: _center, //initial position
-          zoom: 14.0, //initial zoom level
-        ),
-        markers: markers,
-        //markers to show on map
-        mapType: MapType.normal,
-        //map type
-        onMapCreated: (controller) {
-          controller.setMapStyle(MapStyle.mapStyles);
-          //method called when map is created
-          setState(() {
-            mapController = controller;
-          });
-        },
+      body: Stack(
+        children: [
+          GoogleMap(
+            polylines: Set<Polyline>.of(polylines.values),
+            //Map widget from google_maps_flutter package
+            zoomGesturesEnabled: true,
+            //enable Zoom in, out on map
+            initialCameraPosition: const CameraPosition(
+              //innital position in map
+              // target: ,
+              target: _center, //initial position
+              zoom: 14.0, //initial zoom level
+            ),
+            markers: markers,
+            //markers to show on map
+            mapType: MapType.normal,
+            //map type
+            onMapCreated: (controller) {
+              controller.setMapStyle(MapStyle.mapStyles);
+              //method called when map is created
+              setState(() {
+                mapController = controller;
+              });
+            },
+          ),
+          Visibility(
+            visible: isVisible,
+            child: Positioned(
+                bottom: MediaQuery.of(context).size.height * 0,
+                left: MediaQuery.of(context).size.height * 0.0,
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.065,
+                    child: Card(
+                      child: Container(
+                          padding: EdgeInsets.all(9),
+                          child: Text("Total Distance: " + distance.toStringAsFixed(2) + " KM",
+                              style: TextStyle(fontSize: 14, fontWeight:FontWeight.normal))
+                      ),
+                    )
+                )
+            ),
+          )
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(
-          Icons.location_searching,
-          color: Colors.white,
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.0),
+        child: FloatingActionButton(
+          child: const Icon(
+            Icons.location_searching,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            setState(() {
+              _getCurrentLocation();
+              // _determinePosition();
+              // var a = _currentPosition as Position;
+
+              // print(a);
+              // if(_currentPosition!=null) {
+              //   print("empty");
+              // }
+              // else{
+
+              // }
+
+              if (_currentPosition != null) {
+
+                markers.add(Marker(
+                    markerId: const MarkerId('Home'),
+                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                      BitmapDescriptor.hueGreen,
+                    ),
+                    position: LatLng(_currentPosition?.latitude ?? 0.0,
+                        _currentPosition?.longitude ?? 0.0)));
+                mapController?.animateCamera(
+                    CameraUpdate.newCameraPosition(CameraPosition(
+                  target: LatLng(_currentPosition?.latitude ?? 0.0,
+                      _currentPosition?.longitude ?? 0.0),
+                  zoom: 15.0,
+                )));
+              }
+            });
+          },
         ),
-        onPressed: () {
-          setState(() {
-            _getCurrentLocation();
-            // _determinePosition();
-            // var a = _currentPosition as Position;
-
-            // print(a);
-            // if(_currentPosition!=null) {
-            //   print("empty");
-            // }
-            // else{
-
-            // }
-
-            if (_currentPosition != null) {
-
-              markers.add(Marker(
-                  markerId: const MarkerId('Home'),
-                  icon: BitmapDescriptor.defaultMarkerWithHue(
-                    BitmapDescriptor.hueGreen,
-                  ),
-                  position: LatLng(_currentPosition?.latitude ?? 0.0,
-                      _currentPosition?.longitude ?? 0.0)));
-              mapController?.animateCamera(
-                  CameraUpdate.newCameraPosition(CameraPosition(
-                target: LatLng(_currentPosition?.latitude ?? 0.0,
-                    _currentPosition?.longitude ?? 0.0),
-                zoom: 15.0,
-              )));
-            }
-          });
-        },
       ),
     );
   }
