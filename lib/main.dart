@@ -279,14 +279,14 @@ class _HomeState extends State<Home> {
   double distance = 0.0;
   List<LatLng> polylineCoordinates = [];
 
-  double _coordinateDistance(lat1, lon1, lat2, lon2) {
-    var p = 0.017453292519943295;
-    var c = cos;
-    var a = 0.5 -
-        c((lat2 - lat1) * p) / 2 +
-        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
-    return 12742 * asin(sqrt(a));
-  }
+  // double _coordinateDistance(lat1, lon1, lat2, lon2) {
+  //   var p = 0.017453292519943295;
+  //   var c = cos;
+  //   var a = 0.5 -
+  //       c((lat2 - lat1) * p) / 2 +
+  //       c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+  //   return 12742 * asin(sqrt(a));
+  // }
 
 
   ListView _buildBottonNavigationMethod(
@@ -377,10 +377,18 @@ class _HomeState extends State<Home> {
     } else {
       print(result.errorMessage);
     }
+    mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(54.461786, 17.034049),
+          // LatLng(pointLatLng.latitude, pointLatLng.longitude),
+          // LatLng(_currentPosition?.latitude ?? 0.0,
+          //     _currentPosition?.longitude ?? 0.0),
+          zoom: 14,
+        )));
     addPolyLine(polylineCoordinates);
-    print("LOOOOOOK HEEEEERRREEEEEE");
-    print((Geolocator.distanceBetween(_currentPosition != null ? _currentPosition!.latitude : 0,
-        _currentPosition != null ? _currentPosition!.longitude : 0, pointLatLng.latitude, pointLatLng.longitude)/1000).toStringAsFixed(2));
+    // print("LOOOOOOK HEEEEERRREEEEEE");
+    // print((Geolocator.distanceBetween(_currentPosition != null ? _currentPosition!.latitude : 0,
+    //     _currentPosition != null ? _currentPosition!.longitude : 0, pointLatLng.latitude, pointLatLng.longitude)/1000).toStringAsFixed(2));
 
 //     double totalDistance = 0;
 //     for (int i = 0; i < polylineCoordinates.length - 1; i++) {
@@ -496,8 +504,8 @@ class _HomeState extends State<Home> {
         //position of marker
         infoWindow: const InfoWindow(
           //popup info
-          title: "Regionalne Centrum Wolontariatu",
-          snippet: "aleja Henryka Sienkiewicza 6, 76-200 Słupsk",
+          // title: "Regionalne Centrum Wolontariatu",
+          // snippet: "aleja Henryka Sienkiewicza 6, 76-200 Słupsk",
         ),
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
@@ -529,8 +537,8 @@ class _HomeState extends State<Home> {
         // rotation:-45,
         infoWindow: const InfoWindow(
           //popup info
-          title: "Pomeranian Academy in Slupsk",
-          snippet: "Krzysztofa Arciszewskiego, 76-200 Słupsk",
+          // title: "Pomeranian Academy in Slupsk",
+          // snippet: "Krzysztofa Arciszewskiego, 76-200 Słupsk",
         ),
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
@@ -565,8 +573,8 @@ class _HomeState extends State<Home> {
         //position of marker
         infoWindow: const InfoWindow(
           //popup info
-          title: "Municipal Family Assistance Center",
-          snippet: "Słoneczna 15D, 76-200 Słupsk",
+          // title: "Municipal Family Assistance Center",
+          // snippet: "Słoneczna 15D, 76-200 Słupsk",
         ),
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
@@ -595,8 +603,8 @@ class _HomeState extends State<Home> {
         //position of marker
         infoWindow: const InfoWindow(
           //popup info
-          title: "Zespół Szkół Technicznych",
-          snippet: "Karola Szymanowskiego 5, 76-200 Słupsk",
+          // title: "Zespół Szkół Technicznych",
+          // snippet: "Karola Szymanowskiego 5, 76-200 Słupsk",
         ),
         icon: BitmapDescriptor.defaultMarker,
         onTap: () {
@@ -627,10 +635,10 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Image Marker on Google Map"),
-        backgroundColor: Colors.deepPurpleAccent,
-      ),
+      // appBar: AppBar(
+      //   title: const Text("Image Marker on Google Map"),
+      //   backgroundColor: Colors.deepPurpleAccent,
+      // ),
       body: Stack(
         children: [
           GoogleMap(
@@ -660,14 +668,14 @@ class _HomeState extends State<Home> {
             visible: isVisible,
             child: Positioned(
                 bottom: MediaQuery.of(context).size.height * 0,
-                left: MediaQuery.of(context).size.height * 0.0,
+                left: MediaQuery.of(context).size.height * 0.08,
                 child: Container(
-                  height: MediaQuery.of(context).size.height * 0.065,
+                  height: MediaQuery.of(context).size.height * 0.07,
                     child: Card(
                       child: Container(
                           padding: EdgeInsets.all(9),
                           child: Text("Total Distance: " + distance.toStringAsFixed(2) + " KM",
-                              style: TextStyle(fontSize: 14, fontWeight:FontWeight.normal))
+                              style: TextStyle(fontSize: 16, fontWeight:FontWeight.bold))
                       ),
                     )
                 )
@@ -678,6 +686,7 @@ class _HomeState extends State<Home> {
       floatingActionButton: Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.0),
         child: FloatingActionButton(
+          backgroundColor: Colors.deepPurpleAccent,
           child: const Icon(
             Icons.location_searching,
             color: Colors.white,
