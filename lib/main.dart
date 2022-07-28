@@ -10,7 +10,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'package:custom_info_window/custom_info_window.dart';
 
 
 import 'map_style.dart';
@@ -41,12 +41,19 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
+  CustomInfoWindowController _customInfoWindowController =
+  CustomInfoWindowController();
   // GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
   Map<PolylineId, Polyline> polylines = {};
   LatLng? startLocation;
   LatLng? endLocation;
 
+  @override
+  void dispose() {
+    _customInfoWindowController.dispose();
+    super.dispose();
+  }
   // Completer<GoogleMapController> _controller = Completer();
   // MapsRoutes route = new MapsRoutes();
   String googleApiKey = "AIzaSyDgTt2bcZuY9E80r1aglafLEyVd7g8Qcfk";
@@ -381,14 +388,15 @@ class _HomeState extends State<Home> {
     } else {
       print(result.errorMessage);
     }
-    mapController?.animateCamera(
-        CameraUpdate.newCameraPosition(CameraPosition(
-          target: LatLng(54.461786, 17.034049),
-          // LatLng(pointLatLng.latitude, pointLatLng.longitude),
-          // LatLng(_currentPosition?.latitude ?? 0.0,
-          //     _currentPosition?.longitude ?? 0.0),
-          zoom: 14,
-        )));
+    _customInfoWindowController.googleMapController=mapController;
+    // mapController?.animateCamera(
+    //     CameraUpdate.newCameraPosition(CameraPosition(
+    //       target: LatLng(54.461786, 17.034049),
+    //       // LatLng(pointLatLng.latitude, pointLatLng.longitude),
+    //       // LatLng(_currentPosition?.latitude ?? 0.0,
+    //       //     _currentPosition?.longitude ?? 0.0),
+    //       zoom: 14,
+    //     )));
     addPolyLine(polylineCoordinates);
     // print("LOOOOOOK HEEEEERRREEEEEE");
     // print((Geolocator.distanceBetween(_currentPosition != null ? _currentPosition!.latitude : 0,
@@ -443,7 +451,7 @@ class _HomeState extends State<Home> {
       polylineId: id,
       color: Colors.deepPurpleAccent,
       points: polylineCoordinates,
-      width: 8,
+      width: 5,
     );
     polylines[id] = polyline;
     setState(() {
@@ -661,12 +669,19 @@ class _HomeState extends State<Home> {
             mapType: MapType.normal,
             //map type
             onMapCreated: (controller) {
+              _customInfoWindowController.googleMapController = controller;
               controller.setMapStyle(MapStyle.mapStyles);
               //method called when map is created
               setState(() {
                 mapController = controller;
               });
             },
+          ),
+          CustomInfoWindow(
+            controller: _customInfoWindowController,
+            height: 75,
+            width: 150,
+            offset: 50,
           ),
           Visibility(
             visible: isVisible,
