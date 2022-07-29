@@ -136,16 +136,6 @@ class _HomeState extends State<Home> {
           onPressed: () {
             setState(() {
               _getCurrentLocation();
-              // _determinePosition();
-              // var a = _currentPosition as Position;
-
-              // print(a);
-              // if(_currentPosition!=null) {
-              //   print("empty");
-              // }
-              // else{
-
-              // }
 
               if (_currentPosition != null) {
 
@@ -227,11 +217,8 @@ class _HomeState extends State<Home> {
 
   }
 
-
   double distance = 0.0;
   List<LatLng> polylineCoordinates = [];
-
-
 
   ListView _buildBottonNavigationMethod(
       name, address, imageURL, workHours, point) {
@@ -391,26 +378,26 @@ class _HomeState extends State<Home> {
     //   "assets/images/bike.png",
     // );
 
-    markers.add(custom_marker(LatLng(54.468683, 17.028140,),
+    markers.add(custom_marker(const LatLng(54.468683, 17.028140,),
         "Regionalne Centrum Wolontariatu",
         "aleja Henryka Sienkiewicza 6, 76-200 Słupsk",
         "images/1.jpg",
         "9:00 - 15:00",
         const PointLatLng(54.468683, 17.028140),0.60));
 
-    markers.add(custom_marker(LatLng(54.452438, 17.041785), "Pomeranian Academy in Slupsk",
+    markers.add(custom_marker(const LatLng(54.452438, 17.041785), "Pomeranian Academy in Slupsk",
         "Krzysztofa Arciszewskiego, 76-200 Słupsk",
         "images/2.jpg",
         "9:00 - 15:00",
         const PointLatLng(54.452438, 17.041785),0.60));
 
-    markers.add(custom_marker(LatLng(54.451206, 17.023427), "Municipal Family Assistance Center",
+    markers.add(custom_marker(const LatLng(54.451206, 17.023427), "Municipal Family Assistance Center",
         "Słoneczna 15D, 76-200 Słupsk",
         "images/3.jpg",
         "9:00 - 15:00",
         const PointLatLng(54.451206, 17.023427),0.70));
 
-    markers.add(custom_marker(LatLng(54.458005, 17.028482), "Zespół Szkół Technicznych",
+    markers.add(custom_marker(const LatLng(54.458005, 17.028482), "Zespół Szkół Technicznych",
         "Karola Szymanowskiego 5, 76-200 Słupsk",
         "images/4.jpg",
         "9:00 - 15:00",
