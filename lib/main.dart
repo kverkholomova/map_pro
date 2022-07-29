@@ -235,7 +235,7 @@ class _HomeState extends State<Home> {
           imageURL,
           // width: 50.0,
           // height: 200.0,
-          // fit: BoxFit.cover,
+          fit: BoxFit.fitWidth,
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -278,7 +278,7 @@ class _HomeState extends State<Home> {
                         padding: const EdgeInsets.all(10.0),
                         child: Text(
                             ("Total Distance: ${distance.toStringAsFixed(2)} KM"),
-                                style: const TextStyle(fontSize: 16, fontWeight:FontWeight.bold, color: Colors.white)),
+                                style: const TextStyle(fontSize: 12, fontWeight:FontWeight.bold, color: Colors.white),softWrap: true,),
                       ),
                     ),
                   ),
