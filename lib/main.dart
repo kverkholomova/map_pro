@@ -41,8 +41,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  CustomInfoWindowController _customInfoWindowController =
-  CustomInfoWindowController();
+  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
   // GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
   Map<PolylineId, Polyline> polylines = {};
@@ -337,7 +336,9 @@ class _HomeState extends State<Home> {
               onPressed: () async {
                 isVisible = true;
                 await getDirections(point);
-                Navigator.pop(context);
+                setState(() {
+                  Navigator.pop(context);
+                });
                 // _getPolyline();
                 // PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(googleApiKey,
                 //     PointLatLng(_currentPosition!=null?_currentPosition!.latitude:0, _currentPosition!=null?_currentPosition!.longitude:0), PointLatLng(54.468683, 17.028140));
@@ -389,6 +390,7 @@ class _HomeState extends State<Home> {
       print(result.errorMessage);
     }
     _customInfoWindowController.googleMapController=mapController;
+
     // mapController?.animateCamera(
     //     CameraUpdate.newCameraPosition(CameraPosition(
     //       target: LatLng(54.461786, 17.034049),
@@ -436,8 +438,8 @@ class _HomeState extends State<Home> {
           polylineCoordinates[i+1].latitude,
           polylineCoordinates[i+1].longitude);
     }
-    print("Final distance:");
-    print(totalDistance);
+    // print("Final distance:");
+    // print(totalDistance);
 
     setState(() {
       distance = totalDistance;
@@ -688,13 +690,13 @@ class _HomeState extends State<Home> {
             child: Positioned(
                 bottom: MediaQuery.of(context).size.height * 0,
                 left: MediaQuery.of(context).size.height * 0.08,
-                child: Container(
+                child: SizedBox(
                   height: MediaQuery.of(context).size.height * 0.07,
                     child: Card(
                       child: Container(
-                          padding: EdgeInsets.all(9),
-                          child: Text("Total Distance: " + distance.toStringAsFixed(2) + " KM",
-                              style: TextStyle(fontSize: 16, fontWeight:FontWeight.bold))
+                          padding: const EdgeInsets.all(9),
+                          child: Text("Total Distance: ${distance.toStringAsFixed(2)} KM",
+                              style: const TextStyle(fontSize: 16, fontWeight:FontWeight.bold))
                       ),
                     )
                 )
