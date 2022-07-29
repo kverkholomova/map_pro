@@ -656,6 +656,12 @@ class _HomeState extends State<Home> {
       body: Stack(
         children: [
           GoogleMap(
+            onTap: (position) {
+              _customInfoWindowController.hideInfoWindow!();
+            },
+            onCameraMove: (position) {
+              _customInfoWindowController.onCameraMove!();
+            },
             polylines: Set<Polyline>.of(polylines.values),
             //Map widget from google_maps_flutter package
             zoomGesturesEnabled: true,
@@ -681,9 +687,9 @@ class _HomeState extends State<Home> {
           ),
           CustomInfoWindow(
             controller: _customInfoWindowController,
-            height: 75,
-            width: 150,
-            offset: 50,
+            // height: 75,
+            // width: 150,
+            // offset: 50,
           ),
           Visibility(
             visible: isVisible,
