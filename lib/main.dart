@@ -71,6 +71,9 @@ class _HomeState extends State<Home> {
       body: Stack(
         children: [
           GoogleMap(
+            mapToolbarEnabled: false,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
             onTap: (position) {
               _customInfoWindowController.hideInfoWindow!();
             },
@@ -90,6 +93,7 @@ class _HomeState extends State<Home> {
             markers: markers,
             //markers to show on map
             mapType: MapType.normal,
+
             //map type
             onMapCreated: (controller) {
               _customInfoWindowController.googleMapController = controller;
@@ -99,6 +103,7 @@ class _HomeState extends State<Home> {
                 mapController = controller;
               });
             },
+
           ),
           CustomInfoWindow(
             controller: _customInfoWindowController,
@@ -106,23 +111,23 @@ class _HomeState extends State<Home> {
             // width: 150,
             // offset: 50,
           ),
-          Visibility(
-            visible: isVisible,
-            child: Positioned(
-                bottom: MediaQuery.of(context).size.height * 0,
-                left: MediaQuery.of(context).size.height * 0.08,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.07,
-                    child: Card(
-                      child: Container(
-                          padding: const EdgeInsets.all(9),
-                          child: Text("Total Distance: ${distance.toStringAsFixed(2)} KM",
-                              style: const TextStyle(fontSize: 16, fontWeight:FontWeight.bold))
-                      ),
-                    )
-                )
-            ),
-          )
+          // Visibility(
+          //   visible: isVisible,
+          //   child: Positioned(
+          //       bottom: MediaQuery.of(context).size.height * 0,
+          //       left: MediaQuery.of(context).size.height * 0.08,
+          //       child: SizedBox(
+          //         height: MediaQuery.of(context).size.height * 0.07,
+          //           child: Card(
+          //             child: Container(
+          //                 padding: const EdgeInsets.all(9),
+          //                 child: Text("Total Distance: ${distance.toStringAsFixed(2)} KM",
+          //                     style: const TextStyle(fontSize: 16, fontWeight:FontWeight.bold))
+          //             ),
+          //           )
+          //       )
+          //   ),
+          // )
         ],
       ),
       floatingActionButton: Padding(
@@ -221,7 +226,7 @@ class _HomeState extends State<Home> {
   List<LatLng> polylineCoordinates = [];
 
   ListView _buildBottonNavigationMethod(
-      name, address, imageURL, workHours, point) {
+      name, address, imageURL, workHours,PointLatLng point) {
     return ListView(
       // mainAxisSize: MainAxisSize.min,
       // mainAxisSize: MainAxisSize.max,
@@ -257,6 +262,28 @@ class _HomeState extends State<Home> {
               onPressed: () async {
                 isVisible = true;
                 await getDirections(point);
+                _customInfoWindowController.addInfoWindow!(
+                  Container(
+
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurpleAccent,
+                      borderRadius: BorderRadius.circular(4),
+
+                    ),
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: FittedBox(
+                      fit: BoxFit.fitWidth,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(
+                            ("Total Distance: ${distance.toStringAsFixed(2)} KM"),
+                                style: const TextStyle(fontSize: 16, fontWeight:FontWeight.bold, color: Colors.white)),
+                      ),
+                    ),
+                  ),
+                  LatLng(point.latitude,point.longitude),
+                );
                 setState(() {
                   Navigator.pop(context);
                 });
@@ -329,6 +356,7 @@ class _HomeState extends State<Home> {
       color: Colors.deepPurpleAccent,
       points: polylineCoordinates,
       width: 5,
+
     );
     polylines[id] = polyline;
     setState(() {
