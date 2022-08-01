@@ -50,8 +50,8 @@ class _HomeState extends State<Home> {
   }
 
   String googleApiKey = "AIzaSyDgTt2bcZuY9E80r1aglafLEyVd7g8Qcfk";
-  GoogleMapController? mapController; //contrller for Google map
-  Set<Marker> markers = {}; //markers for google map
+  GoogleMapController? mapController;
+  Set<Marker> markers = {};
 
   String mapStyle = '';
   Position? _currentPosition;
@@ -72,24 +72,16 @@ class _HomeState extends State<Home> {
               _customInfoWindowController.onCameraMove!();
             },
             polylines: Set<Polyline>.of(polylines.values),
-            //Map widget from google_maps_flutter package
             zoomGesturesEnabled: true,
-            //enable Zoom in, out on map
             initialCameraPosition: const CameraPosition(
-              //innital position in map
-              // target: ,
               target: _center, //initial position
               zoom: 14.0, //initial zoom level
             ),
             markers: markers,
-            //markers to show on map
             mapType: MapType.normal,
-
-            //map type
             onMapCreated: (controller) {
               _customInfoWindowController.googleMapController = controller;
               controller.setMapStyle(MapStyle.mapStyles);
-              //method called when map is created
               setState(() {
                 mapController = controller;
               });
@@ -97,7 +89,6 @@ class _HomeState extends State<Home> {
           ),
           CustomInfoWindow(
             controller: _customInfoWindowController,
-
           ),
         ],
       ),
@@ -113,7 +104,6 @@ class _HomeState extends State<Home> {
           onPressed: () {
             setState(() {
               _getCurrentLocation();
-
               if (_currentPosition != null) {
                 markers.add(Marker(
                     markerId: const MarkerId('Home'),
@@ -141,41 +131,23 @@ class _HomeState extends State<Home> {
   /// When the location services are not enabled or permissions
   /// are denied the `Future` will return an error.
   Future<Future<Position>?> _determinePosition() async {
-    // _currentPosition = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
     bool serviceEnabled;
     LocationPermission permission;
-
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
       return Future.error('Location services are disabled.');
     }
-
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
         return Future.error('Location permissions are denied');
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    // return await Geolocator.getCurrentPosition();
     return await _getCurrentLocation();
   }
 
@@ -197,8 +169,6 @@ class _HomeState extends State<Home> {
   ListView _buildBottonNavigationMethod(
       name, address, imageURL, workHours, PointLatLng point, double aspect) {
     return ListView(
-      // mainAxisSize: MainAxisSize.min,
-      // mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         AspectRatio(
           aspectRatio: aspect,
@@ -271,9 +241,6 @@ class _HomeState extends State<Home> {
   }
 
   double totalDistance = 0.0;
-
-// Calculating the total distance by adding the distance
-// between small segments
 
   double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
@@ -359,10 +326,6 @@ class _HomeState extends State<Home> {
   }
 
   addMarkers() async {
-    // BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
-    //   ImageConfiguration(),
-    //   "assets/images/bike.png",
-    // );
 
     markers.add(customMarker(
         const LatLng(
@@ -423,10 +386,8 @@ class _HomeState extends State<Home> {
       double sizeContainer,
       double aspectRatio) {
     return Marker(
-        //add start location marker
         markerId: MarkerId(latLng.toString()),
         position: latLng,
-        //position of marker
         infoWindow: const InfoWindow(
             //popup info
             // title: "Regionalne Centrum Wolontariatu",
@@ -436,7 +397,6 @@ class _HomeState extends State<Home> {
         onTap: () {
           showModalBottomSheet(
               isScrollControlled: true,
-              // elevation: 25,
               context: context,
               builder: (builder) {
                 return Wrap(children: <Widget>[
