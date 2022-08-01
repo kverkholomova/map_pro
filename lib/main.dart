@@ -204,6 +204,7 @@ class _HomeState extends State<Home> {
           aspectRatio: aspect,
           child: Image.asset(
             imageURL,
+            fit: BoxFit.fill,
           ),
         ),
         Padding(
@@ -374,7 +375,7 @@ class _HomeState extends State<Home> {
         "9:00 - 15:00",
         const PointLatLng(54.468683, 17.028140),
         0.60,
-        16/10));
+        16/10.2));
 
     markers.add(customMarker(
         const LatLng(54.452438, 17.041785),
@@ -384,7 +385,7 @@ class _HomeState extends State<Home> {
         "9:00 - 15:00",
         const PointLatLng(54.452438, 17.041785),
         0.60,
-        18/10.2));
+        16/10.2));
 
     markers.add(customMarker(
         const LatLng(54.451206, 17.023427),
@@ -393,8 +394,8 @@ class _HomeState extends State<Home> {
         "images/3.jpg",
         "9:00 - 15:00",
         const PointLatLng(54.451206, 17.023427),
-        0.70,
-        16/13.2));
+        0.60,
+        16/10.2));
 
     markers.add(customMarker(
         const LatLng(54.458005, 17.028482),
@@ -403,8 +404,8 @@ class _HomeState extends State<Home> {
         "images/4.jpg",
         "9:00 - 15:00",
         const PointLatLng(54.458005, 17.028482),
-        0.57,
-        18.1/10.2));
+        0.60,
+        16/10.2));
 
 
     setState(() {
