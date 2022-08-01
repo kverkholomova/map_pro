@@ -1,15 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:math' show cos, sqrt, asin;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:custom_info_window/custom_info_window.dart';
+import 'package:map_pro/map_style/map_style.dart';
 
-import 'map_style.dart';
 
 const LatLng _center = LatLng(54.4641, 17.0287);
 bool isVisible = false;
@@ -40,7 +38,6 @@ class _HomeState extends State<Home> {
   final CustomInfoWindowController _customInfoWindowController =
       CustomInfoWindowController();
 
-  // GoogleMapController? mapController; //contrller for Google map
   PolylinePoints polylinePoints = PolylinePoints();
   Map<PolylineId, Polyline> polylines = {};
   LatLng? startLocation;
@@ -62,10 +59,6 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("Image Marker on Google Map"),
-      //   backgroundColor: Colors.deepPurpleAccent,
-      // ),
       body: Stack(
         children: [
           GoogleMap(
@@ -104,27 +97,8 @@ class _HomeState extends State<Home> {
           ),
           CustomInfoWindow(
             controller: _customInfoWindowController,
-            // height: 75,
-            // width: 150,
-            // offset: 50,
+
           ),
-          // Visibility(
-          //   visible: isVisible,
-          //   child: Positioned(
-          //       bottom: MediaQuery.of(context).size.height * 0,
-          //       left: MediaQuery.of(context).size.height * 0.08,
-          //       child: SizedBox(
-          //         height: MediaQuery.of(context).size.height * 0.07,
-          //           child: Card(
-          //             child: Container(
-          //                 padding: const EdgeInsets.all(9),
-          //                 child: Text("Total Distance: ${distance.toStringAsFixed(2)} KM",
-          //                     style: const TextStyle(fontSize: 16, fontWeight:FontWeight.bold))
-          //             ),
-          //           )
-          //       )
-          //   ),
-          // )
         ],
       ),
       floatingActionButton: Padding(
@@ -230,9 +204,6 @@ class _HomeState extends State<Home> {
           aspectRatio: aspect,
           child: Image.asset(
             imageURL,
-            // width: 50.0,
-            // height: 200.0,
-            // fit: BoxFit.fitWidth,
           ),
         ),
         Padding(
@@ -340,8 +311,6 @@ class _HomeState extends State<Home> {
           polylineCoordinates[i + 1].latitude,
           polylineCoordinates[i + 1].longitude);
     }
-    // print("Final distance:");
-    // print(totalDistance);
 
     setState(() {
       distance = totalDistance;
@@ -362,9 +331,6 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    // print(_currentPosition?.latitude);
-    // _getCurrentLocation();
-
     addMarkers();
     super.initState();
     setState(() {
@@ -378,8 +344,6 @@ class _HomeState extends State<Home> {
   }
 
   void mapCreated(GoogleMapController controller) {
-    //set style on the map on creation to customize look showing only map features
-    //we want to show.
     log(mapStyle);
     setState(() {
       mapController = controller;
@@ -399,7 +363,7 @@ class _HomeState extends State<Home> {
     //   "assets/images/bike.png",
     // );
 
-    markers.add(custom_marker(
+    markers.add(customMarker(
         const LatLng(
           54.468683,
           17.028140,
@@ -412,7 +376,7 @@ class _HomeState extends State<Home> {
         0.60,
         16/10));
 
-    markers.add(custom_marker(
+    markers.add(customMarker(
         const LatLng(54.452438, 17.041785),
         "Pomeranian Academy in Slupsk",
         "Krzysztofa Arciszewskiego, 76-200 Słupsk",
@@ -422,7 +386,7 @@ class _HomeState extends State<Home> {
         0.60,
         18/10.2));
 
-    markers.add(custom_marker(
+    markers.add(customMarker(
         const LatLng(54.451206, 17.023427),
         "Municipal Family Assistance Center",
         "Słoneczna 15D, 76-200 Słupsk",
@@ -432,7 +396,7 @@ class _HomeState extends State<Home> {
         0.70,
         16/13.2));
 
-    markers.add(custom_marker(
+    markers.add(customMarker(
         const LatLng(54.458005, 17.028482),
         "Zespół Szkół Technicznych",
         "Karola Szymanowskiego 5, 76-200 Słupsk",
@@ -442,110 +406,13 @@ class _HomeState extends State<Home> {
         0.57,
         18.1/10.2));
 
-    // markers.add(Marker(
-    //   //add start location marker
-    //     markerId: MarkerId(const LatLng(54.452438, 17.041785).toString()),
-    //     position: const LatLng(54.452438, 17.041785),
-    //     //position of marker
-    //     // rotation:-45,
-    //     infoWindow: const InfoWindow(
-    //       //popup info
-    //       // title: "Pomeranian Academy in Slupsk",
-    //       // snippet: "Krzysztofa Arciszewskiego, 76-200 Słupsk",
-    //     ),
-    //     icon: BitmapDescriptor.defaultMarker,
-    //     onTap: () {
-    //       showModalBottomSheet(
-    //           isScrollControlled: true,
-    //           context: context,
-    //           builder: (builder) {
-    //             return Wrap(children: <Widget>[
-    //               SizedBox(
-    //                 height: MediaQuery.of(context).size.height * 0.60,
-    //                 child: _buildBottonNavigationMethod(
-    //                     "Pomeranian Academy in Slupsk",
-    //                     "Krzysztofa Arciszewskiego, 76-200 Słupsk",
-    //                     "images/2.jpg",
-    //                     "9:00 - 15:00",
-    //                     const PointLatLng(54.452438, 17.041785)),
-    //               )
-    //             ]);
-    //           });
-    //     }));
-
-    // String imgurl = "https://www.fluttercampus.com/img/car.png";
-    // Uint8List bytes = (await NetworkAssetBundle(Uri.parse(imgurl))
-    //     .load(imgurl))
-    //     .buffer
-    //     .asUint8List();
-
-    // markers.add(Marker(
-    //   //add start location marker
-    //     markerId: MarkerId(const LatLng(54.451206, 17.023427).toString()),
-    //     position: const LatLng(54.451206, 17.023427),
-    //     //position of marker
-    //     infoWindow: const InfoWindow(
-    //       //popup info
-    //       // title: "Municipal Family Assistance Center",
-    //       // snippet: "Słoneczna 15D, 76-200 Słupsk",
-    //     ),
-    //     icon: BitmapDescriptor.defaultMarker,
-    //     onTap: () {
-    //       showModalBottomSheet(
-    //           isScrollControlled: true,
-    //           context: context,
-    //           builder: (builder) {
-    //             return Wrap(children: <Widget>[
-    //               SizedBox(
-    //                 height: MediaQuery.of(context).size.height * 0.70,
-    //                 child: _buildBottonNavigationMethod(
-    //                     "Municipal Family Assistance Center",
-    //                     "Słoneczna 15D, 76-200 Słupsk",
-    //                     "images/3.jpg",
-    //                     "9:00 - 15:00",
-    //                     const PointLatLng(54.451206, 17.023427)),
-    //               )
-    //             ]);
-    //           });
-    //     } //Icon for Marker
-    // ));
-    // markers.add(Marker(
-    //   //add start location marker
-    //     markerId: MarkerId(const LatLng(54.458005, 17.028482).toString()),
-    //     position: const LatLng(54.458005, 17.028482),
-    //     //position of marker
-    //     infoWindow: const InfoWindow(
-    //       //popup info
-    //       // title: "Zespół Szkół Technicznych",
-    //       // snippet: "Karola Szymanowskiego 5, 76-200 Słupsk",
-    //     ),
-    //     icon: BitmapDescriptor.defaultMarker,
-    //     onTap: () {
-    //       showModalBottomSheet(
-    //           isScrollControlled: true,
-    //           context: context,
-    //           builder: (builder) {
-    //             return Wrap(children: <Widget>[
-    //               SizedBox(
-    //                 height: MediaQuery.of(context).size.height * 0.57,
-    //                 child: _buildBottonNavigationMethod(
-    //                     "Zespół Szkół Technicznych",
-    //                     "Karola Szymanowskiego 5, 76-200 Słupsk",
-    //                     "images/4.jpg",
-    //                     "9:00 - 15:00",
-    //                     const PointLatLng(54.458005, 17.028482)),
-    //               )
-    //             ]);
-    //           });
-    //     } //Icon for Marker
-    // ));
 
     setState(() {
       //refresh UI
     });
   }
 
-  Marker custom_marker(
+  Marker customMarker(
       LatLng latLng,
       String name,
       String address,
