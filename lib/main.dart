@@ -6,7 +6,6 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:custom_info_window/custom_info_window.dart';
-import 'package:map_pro/location_markers/markers_loc.dart';
 import 'package:map_pro/map_style/map_style.dart';
 
 const LatLng _center = LatLng(54.4641, 17.0287);
@@ -74,8 +73,8 @@ class _HomeState extends State<Home> {
             polylines: Set<Polyline>.of(polylines.values),
             zoomGesturesEnabled: true,
             initialCameraPosition: const CameraPosition(
-              target: _center, //initial position
-              zoom: 14.0, //initial zoom level
+              target: _center,
+              zoom: 14.0,
             ),
             markers: markers,
             mapType: MapType.normal,
@@ -104,26 +103,30 @@ class _HomeState extends State<Home> {
           onPressed: () {
             setState(() {
               _getCurrentLocation();
-              if (_currentPosition != null) {
-                markers.add(Marker(
-                    markerId: const MarkerId('Home'),
-                    icon: BitmapDescriptor.defaultMarkerWithHue(
-                      BitmapDescriptor.hueGreen,
-                    ),
-                    position: LatLng(_currentPosition?.latitude ?? 0.0,
-                        _currentPosition?.longitude ?? 0.0)));
-                mapController?.animateCamera(
-                    CameraUpdate.newCameraPosition(CameraPosition(
-                  target: LatLng(_currentPosition?.latitude ?? 0.0,
-                      _currentPosition?.longitude ?? 0.0),
-                  zoom: 15.0,
-                )));
-              }
+              checkCurrentPosition();
             });
           },
         ),
       ),
     );
+  }
+
+  void checkCurrentPosition() {
+    if (_currentPosition != null) {
+      markers.add(Marker(
+          markerId: const MarkerId('Home'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueGreen,
+          ),
+          position: LatLng(_currentPosition?.latitude ?? 0.0,
+              _currentPosition?.longitude ?? 0.0)));
+      mapController
+          ?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(_currentPosition?.latitude ?? 0.0,
+            _currentPosition?.longitude ?? 0.0),
+        zoom: 15.0,
+      )));
+    }
   }
 
   /// Determine the current position of the device.
@@ -166,12 +169,12 @@ class _HomeState extends State<Home> {
   double distance = 0.0;
   List<LatLng> polylineCoordinates = [];
 
-  ListView _buildBottonNavigationMethod(
-      name, address, imageURL, workHours, PointLatLng point, double aspect) {
+  ListView _buildBottomNavigationMethod(
+      name, address, imageURL, workHours, PointLatLng point) {
     return ListView(
       children: <Widget>[
         AspectRatio(
-          aspectRatio: 16/10.2,
+          aspectRatio: 16 / 10.2,
           child: Image.asset(
             imageURL,
             fit: BoxFit.fill,
@@ -332,9 +335,7 @@ class _HomeState extends State<Home> {
         "aleja Henryka Sienkiewicza 6, 76-200 Słupsk",
         "images/1.jpg",
         "9:00 - 15:00",
-        const PointLatLng(54.468683, 17.028140),
-        0.60,
-        16 / 10.2));
+        const PointLatLng(54.468683, 17.028140)));
 
     markers.add(customMarker(
         const LatLng(54.452438, 17.041785),
@@ -342,9 +343,7 @@ class _HomeState extends State<Home> {
         "Krzysztofa Arciszewskiego, 76-200 Słupsk",
         "images/2.jpg",
         "9:00 - 15:00",
-        const PointLatLng(54.452438, 17.041785),
-        0.60,
-        16 / 10.2));
+        const PointLatLng(54.452438, 17.041785)));
 
     markers.add(customMarker(
         const LatLng(54.451206, 17.023427),
@@ -352,9 +351,7 @@ class _HomeState extends State<Home> {
         "Słoneczna 15D, 76-200 Słupsk",
         "images/3.jpg",
         "9:00 - 15:00",
-        const PointLatLng(54.451206, 17.023427),
-        0.60,
-        16 / 10.2));
+        const PointLatLng(54.451206, 17.023427)));
 
     markers.add(customMarker(
         const LatLng(54.458005, 17.028482),
@@ -362,24 +359,15 @@ class _HomeState extends State<Home> {
         "Karola Szymanowskiego 5, 76-200 Słupsk",
         "images/4.jpg",
         "9:00 - 15:00",
-        const PointLatLng(54.458005, 17.028482),
-        0.60,
-        16 / 10.2));
+        const PointLatLng(54.458005, 17.028482)));
 
     setState(() {
       //refresh UI
     });
   }
 
-  Marker customMarker(
-      LatLng latLng,
-      String name,
-      String address,
-      String image,
-      String workHours,
-      PointLatLng pointLatLng,
-      double sizeContainer,
-      double aspectRatio) {
+  Marker customMarker(LatLng latLng, String name, String address, String image,
+      String workHours, PointLatLng pointLatLng) {
     return Marker(
         markerId: MarkerId(latLng.toString()),
         position: latLng,
@@ -396,9 +384,9 @@ class _HomeState extends State<Home> {
               builder: (builder) {
                 return Wrap(children: <Widget>[
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * sizeContainer,
-                    child: _buildBottonNavigationMethod(name, address, image,
-                        workHours, pointLatLng, aspectRatio),
+                    height: MediaQuery.of(context).size.height * 0.60,
+                    child: _buildBottomNavigationMethod(
+                        name, address, image, workHours, pointLatLng),
                   ),
                 ]);
               });
